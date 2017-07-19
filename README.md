@@ -16,7 +16,7 @@ Extend [BillingManager](src/main/java/billing/BillingManager.kt) with your payme
         initiatePurchaseFlow(activity, "buy_coins", BillingClient.SkuType.INAPP)
     }
 
-Instanciate [BillingModel](src/main/java/billing/BillingModel.kt) once as singleton or via Dagger2.
+Instantiate [BillingModel](src/main/java/billing/BillingModel.kt) once as singleton or via Dagger2.
 In every Android component where you will be use billing, add next lines:
 
     @Inject

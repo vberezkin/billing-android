@@ -28,7 +28,7 @@ In every Android component where you will use billing, add the next lines:
         super.onCreate(savedInstanceState);
         ...
         billingSubscription = billingModel.subscribe(purchases -> {
-            //  Here our purchases comes
+            //  Here our purchases come
         });
         ...
     }

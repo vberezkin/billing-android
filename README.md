@@ -17,7 +17,7 @@ Extend [BillingManager](src/main/java/billing/BillingManager.kt) with your payme
     }
 
 Instantiate [BillingModel](src/main/java/billing/BillingModel.kt) once as singleton or via Dagger2.
-In every Android component where you will use billing, add the next lines:
+In every Android component where you are going to use billing, add the next lines:
 
     @Inject
     AppBillingModel billingModel;

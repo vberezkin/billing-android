@@ -20,7 +20,7 @@ Instantiate [BillingModel](src/main/java/billing/BillingModel.kt) once as single
 In every Android component where you are going to use billing, add the next lines:
 
     @Inject
-    AppBillingModel billingModel;
+    BillingModel billingModel;
     private Disposable billingSubscription;
 
     @Override

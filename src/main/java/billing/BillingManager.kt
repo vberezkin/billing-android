@@ -13,7 +13,7 @@ import io.reactivex.functions.Consumer
 private val TAG = BillingManager::class.java.simpleName
 
 class BillingManager(context: Context, val purchaseConsumer: Consumer<List<Purchase>>) : PurchasesUpdatedListener {
-    private val billingClient: BillingClient = BillingClient.Builder(context).setListener(this).build()
+    private val billingClient: BillingClient = BillingClient.newBuilder(context).setListener(this).build()
     private var isServiceConnected = false
 
     init {
@@ -29,7 +29,9 @@ class BillingManager(context: Context, val purchaseConsumer: Consumer<List<Purch
     }
 
     fun destroy() {
-        billingClient.endConnection()
+        if (billingClient.isReady) {
+            billingClient.endConnection()
+        }
     }
 
     fun consumeAsync(purchaseToken: String, listener: ConsumeResponseListener) {
@@ -77,7 +79,7 @@ class BillingManager(context: Context, val purchaseConsumer: Consumer<List<Purch
     fun initiatePurchaseFlow(activity: Activity, skuId: String, @BillingClient.SkuType billingType: String) {
         val purchaseFlowRequest = Runnable {
             Log.d(TAG, "Launching in-app purchase flow")
-            val purchaseParams = BillingFlowParams.Builder()
+            val purchaseParams = BillingFlowParams.newBuilder()
                     .setSku(skuId).setType(billingType).build()
             billingClient.launchBillingFlow(activity, purchaseParams)
         }

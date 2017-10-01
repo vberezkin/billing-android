@@ -25,8 +25,7 @@ open class BillingModel(private val context: Context) {
         subscription.dispose()
     }
 
-    private val observable = Observable.create<List<Purchase>> {
-        emitter ->
+    private val observable = Observable.create<List<Purchase>> { emitter ->
         Log.d(TAG, "subscribed")
         billingManager = BillingManager(context, Consumer {
             if (purchasesCache != it) {
@@ -34,10 +33,11 @@ open class BillingModel(private val context: Context) {
                 emitter.onNext(it)
             }
         })
-    }.doOnDispose {
-        Log.d(TAG, "unsubscribed")
-        billingManager?.destroy()
-        billingManager = null
+        emitter.setCancellable({
+            Log.d(TAG, "unsubscribed")
+            billingManager?.destroy()
+            billingManager = null
+        })
     }.share()
 
     var billingManager: BillingManager? = null

@@ -4,10 +4,10 @@ RxJava wrapper for Android Play Billing Library
 Make sure that your root project build.gradle file has this section
 
     ext {
-        compileSdkVersion = 25
-        buildToolsVersion = '25.0.3'
-        androidBillingLibraryVersion = 'dp-1'
-        rxJavaVersion = '2.1.1'
+        compileSdkVersion = 26
+        buildToolsVersion = '26.0.1'
+        androidBillingLibraryVersion = ‘1.0’
+        rxJavaVersion = ‘2.1.4’
     }
 
 Extend [BillingManager](src/main/java/billing/BillingManager.kt) with your payment requests

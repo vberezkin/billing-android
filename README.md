@@ -5,7 +5,6 @@ Make sure that your root project build.gradle file has this section
 
     ext {
         compileSdkVersion = 26
-        buildToolsVersion = '26.0.1'
         androidBillingLibraryVersion = ‘1.0’
         rxJavaVersion = ‘2.1.4’
     }

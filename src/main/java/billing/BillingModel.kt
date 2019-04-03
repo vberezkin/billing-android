@@ -14,18 +14,7 @@ private val TAG = BillingModel::class.java.simpleName
 
 open class BillingModel(private val context: Context) {
 
-    fun subscribe(consumer: Consumer<List<Purchase>>): Disposable {
-        purchasesCache?.let {
-            consumer.accept(it)
-        }
-        return observable.subscribe(consumer)
-    }
-
-    fun unsubscribe(subscription: Disposable) {
-        subscription.dispose()
-    }
-
-    private val observable = Observable.create<List<Purchase>> { emitter ->
+    private val billingObservable = Observable.create<List<Purchase>> { emitter ->
         Log.d(TAG, "subscribed")
         billingManager = BillingManager(context, Consumer {
             if (purchasesCache != it) {
@@ -39,6 +28,11 @@ open class BillingModel(private val context: Context) {
             billingManager = null
         })
     }.share()
+
+    val purchases = billingObservable.startWith(Observable.create { em ->
+        purchasesCache?.let { em.onNext(it) }
+        em.onComplete()
+    })
 
     var billingManager: BillingManager? = null
     private var purchasesCache: List<Purchase>? = null

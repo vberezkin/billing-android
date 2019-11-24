@@ -4,9 +4,9 @@ RxJava wrapper for Android Play Billing Library
 Make sure that your root project build.gradle file has this section
 
     ext {
-        compileSdkVersion = 27
-        androidBillingLibraryVersion = ‘1.0’
-        rxJavaVersion = ‘2.1.8’
+        compileSdkVersion = 28
+        androidBillingLibraryVersion = ‘1.2.2’
+        rxJavaVersion = ‘2.2.3’
     }
 
 Extend [BillingManager](src/main/java/billing/BillingManager.kt) with your payment requests
@@ -26,7 +26,7 @@ In every Android component where you are going to use billing, add the next line
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ...
-        billingSubscription = billingModel.subscribe(purchases -> {
+        billingSubscription = billingModel.purchases.subscribe(purchases -> {
             //  Here our purchases come
         });
         ...
@@ -35,7 +35,7 @@ In every Android component where you are going to use billing, add the next line
     @Override
     public void onDestroy() {
         ...
-        billingModel.unsubscribe(billingSubscription);
+        billingSubscription.dispose();
         super.onDestroy();
     }
 

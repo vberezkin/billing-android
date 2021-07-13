@@ -13,7 +13,7 @@ import io.reactivex.functions.Consumer
 private val TAG = BillingManager::class.java.simpleName
 
 class BillingManager(context: Context, private val purchaseConsumer: Consumer<List<Purchase>>) : PurchasesUpdatedListener {
-    private val billingClient: BillingClient = BillingClient.newBuilder(context).setListener(this).build()
+    private val billingClient: BillingClient = BillingClient.newBuilder(context).enablePendingPurchases().setListener(this).build()
     private var isServiceConnected = false
 
     init {
@@ -22,8 +22,8 @@ class BillingManager(context: Context, private val purchaseConsumer: Consumer<Li
         })
     }
 
-    override fun onPurchasesUpdated(responseCode: Int, purchases: MutableList<Purchase>?) {
-        if (responseCode == BillingClient.BillingResponse.OK && purchases != null) {
+    override fun onPurchasesUpdated(result: BillingResult, purchases: MutableList<Purchase>?) {
+        if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             purchaseConsumer.accept(purchases)
         }
     }
@@ -36,7 +36,8 @@ class BillingManager(context: Context, private val purchaseConsumer: Consumer<Li
 
     fun consumeAsync(purchaseToken: String, listener: ConsumeResponseListener) {
         val consumeRequest = Runnable {
-            billingClient.consumeAsync(purchaseToken) { purchaseToken_, resultCode ->
+            val params = ConsumeParams.newBuilder().setPurchaseToken(purchaseToken).build()
+            billingClient.consumeAsync(params) { purchaseToken_, resultCode ->
                 Log.d(TAG, "consumeAsync $resultCode")
                 listener.onConsumeResponse(purchaseToken_, resultCode)
             }
@@ -50,8 +51,8 @@ class BillingManager(context: Context, private val purchaseConsumer: Consumer<Li
                 isServiceConnected = false
             }
 
-            override fun onBillingSetupFinished(resultCode: Int) {
-                if (resultCode == BillingClient.BillingResponse.OK) {
+            override fun onBillingSetupFinished(result: BillingResult) {
+                if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                     isServiceConnected = true
                     executeOnSuccess?.run()
                 }
@@ -70,19 +71,30 @@ class BillingManager(context: Context, private val purchaseConsumer: Consumer<Li
     private fun queryPurchases() {
         executeServiceRequest(Runnable {
             val time = System.currentTimeMillis()
-            val purchasesResult = billingClient.queryPurchases(BillingClient.SkuType.INAPP)
-            Log.d(TAG, "Querying purchases elapsed time: ${System.currentTimeMillis() - time} ms")
-            onPurchasesUpdated(purchasesResult.responseCode, purchasesResult.purchasesList)
+            billingClient.queryPurchasesAsync(BillingClient.SkuType.INAPP, object : PurchasesResponseListener {
+                override fun onQueryPurchasesResponse(
+                    purchasesResult: BillingResult,
+                    purchasesList: MutableList<Purchase>
+                ) {
+                    Log.d(TAG, "Querying purchases elapsed time: ${System.currentTimeMillis() - time} ms")
+                    onPurchasesUpdated(purchasesResult, purchasesList)
+                }
+            })
         })
     }
 
     fun initiatePurchaseFlow(activity: Activity, skuId: String, @BillingClient.SkuType billingType: String) {
         val purchaseFlowRequest = Runnable {
             Log.d(TAG, "Launching in-app purchase flow")
-            //  TODO: Fix deprecated
-            val purchaseParams = BillingFlowParams.newBuilder()
-                    .setSku(skuId).setType(billingType).build()
-            billingClient.launchBillingFlow(activity, purchaseParams)
+            val skuDetails = SkuDetailsParams.newBuilder().setSkusList(listOf(skuId)).setType(billingType).build()
+            billingClient.querySkuDetailsAsync(skuDetails, object : SkuDetailsResponseListener {
+                override fun onSkuDetailsResponse(result: BillingResult, details: MutableList<SkuDetails>?) {
+                    details?.firstOrNull()?.let {
+                        val purchaseParams = BillingFlowParams.newBuilder().setSkuDetails(it).build()
+                        billingClient.launchBillingFlow(activity, purchaseParams)
+                    }
+                }
+            })
         }
         executeServiceRequest(purchaseFlowRequest)
     }

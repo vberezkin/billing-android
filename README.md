@@ -5,8 +5,8 @@ Make sure that your root project build.gradle file has this section
 
     ext {
         compileSdkVersion = 28
-        androidBillingLibraryVersion = ‘1.2.2’
-        rxJavaVersion = ‘2.2.3’
+        androidBillingLibraryVersion = ‘4.0.0’
+        rxJavaVersion = ‘2.2.9’
     }
 
 Extend [BillingManager](src/main/java/billing/BillingManager.kt) with your payment requests

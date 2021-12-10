@@ -22,11 +22,11 @@ open class BillingModel(private val context: Context) {
                 emitter.onNext(it)
             }
         })
-        emitter.setCancellable({
+        emitter.setCancellable{
             Log.d(TAG, "unsubscribed")
             billingManager?.destroy()
             billingManager = null
-        })
+        }
     }.share()
 
     val purchases = billingObservable.startWith(Observable.create { em ->
